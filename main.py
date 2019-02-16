@@ -18,6 +18,10 @@ class FlyBooking:
                (self.id, self.client_name, self.fly_number,
                 self.from_loc, self.to_loc, self.date)
 
+    @classmethod
+    def count(cls):
+        return """SELECT COUNT(*) FROM fly_booking"""
+
 
 class HotelBooking:
     def __init__(self, id_, client_name, hotel_name, arrival, departure):
@@ -49,6 +53,10 @@ class Account:
         return """UPDATE account SET client_name = %s, amount = %s where id = %s""", \
                (self.client_name, self.amount, self.id)
 
+    def exists(self):
+        return """SELECT COUNT(*) from account where id = %s""", \
+               (self.id)
+
 
 if __name__ == "__main__":
     try:
@@ -60,22 +68,38 @@ if __name__ == "__main__":
                       "db2": psycopg2.connect(database="db2", **params),
                       "db3": psycopg2.connect(database="db3", **params)}
         cursor = {k: v.cursor() for k, v in connection.items()}
+
+        # Preparing workground
+
+        # Deleting all flights
         cursor["db1"].execute("""DELETE FROM fly_booking""")
         connection["db1"].commit()
 
-        ammount_to_pay = 600
-
+        # Creating account of a bad man
         acc = Account(id_=3, client_name="Bad man", amount=500)
+        cursor["db3"].execute(acc.exists())
+        if cursor.fetchone()[0] == 0:
+            cursor["db3"].execute(acc.create())
+            connection["db3"].commit()
 
-        cursor["db1"].execute("""SELECT COUNT(*) FROM fly_booking""")
+        # Amount to pay
+        fee = 501
+
+        # Creating the next(id) flight
+        cursor["db1"].execute(FlyBooking.count())
         flights = cursor["db1"].fetchone()[0]
-        fly = FlyBooking(id_=flights, client_name=acc.client_name, fly_number="FLY123", from_loc="LCA", to_loc="UKR",
-                         date=datetime.datetime.now())
-        acc.amount -= ammount_to_pay
+        fly = FlyBooking(id_=flights, client_name=acc.client_name,
+                         fly_number="FLY123", from_loc="LCA",
+                         to_loc="UKR", date=datetime.datetime.now())
 
+        # Changing the balance locally
+        acc.amount -= fee
+
+        # Executing the queries
         cursor["db1"].execute(*fly.create())
         cursor["db3"].execute(*acc.update())
 
+        # Doing the commit
         connection["db1"].commit()
         connection["db3"].commit()
     except psycopg2.DatabaseError as error:
