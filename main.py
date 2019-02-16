@@ -55,7 +55,7 @@ class Account:
 
     def exists(self):
         return """SELECT COUNT(*) from account where id = %s""", \
-               (self.id)
+               (self.id,)
 
 
 if __name__ == "__main__":
@@ -77,9 +77,9 @@ if __name__ == "__main__":
 
         # Creating account of a bad man
         acc = Account(id_=3, client_name="Bad man", amount=500)
-        cursor["db3"].execute(acc.exists())
-        if cursor.fetchone()[0] == 0:
-            cursor["db3"].execute(acc.create())
+        cursor["db3"].execute(*acc.exists())
+        if cursor["db3"].fetchone()[0] == 0:
+            cursor["db3"].execute(*acc.create())
             connection["db3"].commit()
 
         # Amount to pay
