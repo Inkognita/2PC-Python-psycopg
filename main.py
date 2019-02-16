@@ -8,11 +8,11 @@ def prepare(trans, trans_name):
 
 
 def rollback(trans_name):
-    return """ROLLBACK PREPARED %s""", (trans_name,)
+    return """ROLLBACK PREPARED %s;""", (trans_name,)
 
 
 def commit(trans_name):
-    return """COMMIT PREPARED %s""", (trans_name,)
+    return """COMMIT PREPARED %s;""", (trans_name,)
 
 
 class FlyBooking:
@@ -96,12 +96,10 @@ if __name__ == "__main__":
             connection["db3"].commit()
 
         # Amount to pay
-        fee = 500
+        fee = 501
 
-        # Creating the next(id) flight
-        cursor["db1"].execute(FlyBooking.count())
-        flights = cursor["db1"].fetchone()[0]
-        fly = FlyBooking(id_=flights, client_name=acc.client_name,
+        # Creating the flight
+        fly = FlyBooking(id_=1, client_name=acc.client_name,
                          fly_number="FLY123", from_loc="LCA",
                          to_loc="UKR", date=datetime.datetime.now())
 
