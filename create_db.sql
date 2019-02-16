@@ -16,6 +16,7 @@ CREATE TABLE fly_booking
   to_loc VARCHAR(5),
   date timestamp
 );
+GRANT ALL PRIVILEGES ON TABLE fly_booking TO postgres_user;
 
 CREATE DATABASE db2 OWNER postgres_user;
 \c db2;
@@ -27,7 +28,7 @@ CREATE TABLE hotel_booking
   arrival timestamp,
   departure timestamp
 );
-
+GRANT ALL PRIVILEGES ON TABLE hotel_booking TO postgres_user;
 
 CREATE DATABASE db3 OWNER postgres_user;
 \c db3;
