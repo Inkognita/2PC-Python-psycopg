@@ -2,6 +2,19 @@ import psycopg2
 import datetime
 
 
+def prepare(trans, trans_name):
+    return """BEGIN; {}; PREPARE TRANSACTION %s;""".format(trans[0]), \
+           trans[1] + [trans_name]
+
+
+def rollback(trans_name):
+    return """ROLLBACK PREPARED %s""", (trans_name,)
+
+
+def commit(trans_name):
+    return """COMMIT PREPARED %s""", (trans_name,)
+
+
 class FlyBooking:
     def __init__(self, id_, client_name, fly_number, from_loc, to_loc, date):
         self.id = id_
@@ -15,8 +28,8 @@ class FlyBooking:
         return """INSERT INTO fly_booking (
         id, client_name, fly_number, from_loc, to_loc, date)
          VALUES (%s, %s, %s, %s, %s, %s)""", \
-               (self.id, self.client_name, self.fly_number,
-                self.from_loc, self.to_loc, self.date)
+               [self.id, self.client_name, self.fly_number,
+                self.from_loc, self.to_loc, self.date]
 
     @classmethod
     def count(cls):
@@ -35,8 +48,8 @@ class HotelBooking:
         return """INSERT INTO hotel_booking (
         id, client_name, hotel_name, arrival, departure)
          VALUES (%s, %s, %s, %s, %s)""", \
-               (self.id, self.client_name, self.hotel_name,
-                self.arrival, self.departure)
+               [self.id, self.client_name, self.hotel_name,
+                self.arrival, self.departure]
 
 
 class Account:
@@ -47,15 +60,15 @@ class Account:
 
     def create(self):
         return """INSERT INTO account (id, client_name, amount) VALUES (%s, %s, %s)""", \
-               (self.id, self.client_name, self.amount)
+               [self.id, self.client_name, self.amount]
 
     def update(self):
         return """UPDATE account SET client_name = %s, amount = %s where id = %s""", \
-               (self.client_name, self.amount, self.id)
+               [self.client_name, self.amount, self.id]
 
     def exists(self):
         return """SELECT COUNT(*) from account where id = %s""", \
-               (self.id,)
+               [self.id, ]
 
 
 if __name__ == "__main__":
@@ -83,7 +96,7 @@ if __name__ == "__main__":
             connection["db3"].commit()
 
         # Amount to pay
-        fee = 501
+        fee = 500
 
         # Creating the next(id) flight
         cursor["db1"].execute(FlyBooking.count())
