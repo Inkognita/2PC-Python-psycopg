@@ -7,4 +7,4 @@ Basic showcase of using Two-Phase Transaction in Python3 `psycopg2` package.
 `main.py` contains the showcase example.
 
 _If we do not commit or rollback a 2PC transaction, then it will wait:_
-![alt=info from pg_prepared_xacts talbe](locked-trans.png)
+![alt=info from pg_prepared_xacts talbe](prepared_trans_wait.png)
