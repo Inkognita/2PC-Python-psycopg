@@ -93,7 +93,10 @@ if __name__ == "__main__":
         cursor["db3"].execute(*acc.exists())
         if cursor["db3"].fetchone()[0] == 0:
             cursor["db3"].execute(*acc.create())
-            connection["db3"].commit()
+        else:
+            cursor["db3"].execute(*acc.update())
+        connection["db3"].commit()
+
 
         # Amount to pay
         fee = 501
@@ -113,7 +116,7 @@ if __name__ == "__main__":
         # Doing the commit
         connection["db1"].commit()
         connection["db3"].commit()
-    except psycopg2.DatabaseError as error:
+    except (Exception, psycopg2.DatabaseError) as error:
         print("Error in transction Reverting all other operations of a transction ", error)
         for con in connection.values():
             con.rollback()
